@@ -14,8 +14,8 @@
 
 mod context;
 
-use crate::syscall::syscall;
-use crate::task::{exit_current_and_run_next, suspend_current_and_run_next};
+use crate::syscall::{self, syscall};
+use crate::task::{exit_current_and_run_next, suspend_current_and_run_next, TASK_MANAGER};
 use crate::timer::set_next_trigger;
 use core::arch::global_asm;
 use riscv::register::{
@@ -48,7 +48,9 @@ pub fn enable_timer_interrupt() {
 pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     let scause = scause::read(); // get trap cause
     let stval = stval::read(); // get extra value
-                               // trace!("into {:?}", scause.cause());
+
+    // trace!("into {:?}", scause.cause());
+
     match scause.cause() {
         Trap::Exception(Exception::UserEnvCall) => {
             // jump to next instruction anyway
